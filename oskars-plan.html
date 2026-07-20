@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oskars Plan 2026–2036</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b27; --panel2:#1c2333; --border:#2a3348;
+    --text:#e6e9f0; --muted:#8b93a7; --accent:#4f8cff; --accent2:#7c5cff;
+    --green:#3ddc84; --red:#ff5c5c; --gold:#ffc857;
+    --kar:#4f8cff; --utd:#7c5cff; --fys:#3ddc84; --sos:#ffc857; --oko:#ff8c5c; --men:#5cd6ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-bottom:60px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 16px}
+
+  header{padding:36px 0 20px;text-align:center}
+  h1{font-size:1.9rem;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);margin-top:6px;font-size:.95rem}
+  .quote{margin:18px auto 0;max-width:600px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 18px;font-style:italic;color:#c8cfdd;cursor:pointer;transition:border-color .2s}
+  .quote:hover{border-color:var(--accent)}
+  .quote small{display:block;margin-top:6px;font-style:normal;color:var(--muted)}
+
+  .totalbar{margin:22px 0 8px}
+  .totalbar .lbl{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+  .bar{height:12px;background:var(--panel2);border-radius:6px;overflow:hidden}
+  .bar>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px;transition:width .4s;width:0}
+
+  .counts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+  .count{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+  .count .num{font-size:1.6rem;font-weight:700;color:var(--gold)}
+  .count .lab{font-size:.8rem;color:var(--muted);margin-top:4px}
+  .count.done .num{color:var(--green)}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 16px;justify-content:center}
+  .tab{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:.88rem;transition:.2s}
+  .tab:hover{color:var(--text)}
+  .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
+
+  .phase{display:none}
+  .phase.show{display:block;animation:fade .25s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .phase-head{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .phase-head h2{font-size:1.15rem}
+  .phase-head p{color:var(--muted);font-size:.88rem;margin-top:4px}
+  .phase-head .bar{margin-top:10px}
+  .phase-head .pct{font-size:.8rem;color:var(--muted);margin-top:5px;text-align:right}
+
+  .cat-group{margin-bottom:10px}
+  .cat-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 0 6px 4px}
+  .item{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;transition:.2s}
+  .item:hover{border-color:#3a4560}
+  .item.done{opacity:.55}
+  .item.done .txt{text-decoration:line-through}
+  .chk{width:20px;height:20px;min-width:20px;border-radius:6px;border:2px solid var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;transition:.15s}
+  .item.done .chk{background:var(--green);border-color:var(--green);color:#0d1117}
+  .txt{flex:1;font-size:.92rem;line-height:1.35}
+  .tag{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+  .deadline{font-size:.72rem;color:var(--gold);white-space:nowrap}
+  .ibtn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 4px;opacity:0;transition:.15s}
+  .item:hover .ibtn{opacity:1}
+  .ibtn:hover{color:var(--text)}
+
+  .adder{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .adder input[type=text]{flex:1;min-width:180px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.9rem}
+  .adder select,.adder button{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.88rem;cursor:pointer}
+  .adder button{background:var(--accent);border-color:transparent;font-weight:600}
+  .adder button:hover{filter:brightness(1.1)}
+
+  section.block{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin:22px 0}
+  section.block h3{font-size:1.05rem;margin-bottom:4px}
+  section.block .desc{color:var(--muted);font-size:.85rem;margin-bottom:14px}
+
+  .habit{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--panel2);flex-wrap:wrap}
+  .habit:last-child{border:none}
+  .habit .hname{flex:1;min-width:140px;font-size:.9rem}
+  .habit .hgoal{font-size:.75rem;color:var(--muted)}
+  .days{display:flex;gap:5px}
+  .day{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--panel2);color:var(--muted);font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+  .day.on{background:var(--green);border-color:var(--green);color:#0d1117;font-weight:700}
+  .habit.met .hname::after{content:" ✅"}
+
+  .sales-form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .sales-form input{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.9rem;color-scheme:dark}
+  .sales-form button{background:var(--accent);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-weight:600;cursor:pointer}
+  .sales-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .sstat{background:var(--panel2);border-radius:10px;padding:10px 16px;text-align:center;flex:1;min-width:100px}
+  .sstat .n{font-size:1.3rem;font-weight:700}
+  .sstat .l{font-size:.72rem;color:var(--muted)}
+  .srow{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;margin-bottom:4px;background:var(--panel2);font-size:.88rem}
+  .srow .m{flex:1}
+  .srow .v{font-weight:700}
+  .srow.hit .v{color:var(--green)}
+  .srow.miss .v{color:var(--red)}
+  .srow button{background:none;border:none;color:var(--muted);cursor:pointer}
+  .srow button:hover{color:var(--red)}
+
+  .footer-btns{display:flex;gap:10px;justify-content:center;margin-top:30px;flex-wrap:wrap}
+  .footer-btns button,.footer-btns label{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.82rem}
+  .footer-btns button:hover,.footer-btns label:hover{color:var(--text);border-color:var(--accent)}
+  .hint{text-align:center;color:var(--muted);font-size:.75rem;margin-top:14px}
+  @media(max-width:560px){.counts{grid-template-columns:1fr}.days{width:100%;justify-content:flex-start;margin-top:6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Oskars Plan 2026–2036</h1>
+    <div class="sub">Snødriv → BI Bergen Finans → Master → Karriere. Ett steg om gangen.</div>
+    <div class="quote" id="quote" title="Klikk for nytt sitat"></div>
+    <div class="totalbar">
+      <div class="lbl"><span>Total fremgang</span><span id="totalPct">0%</span></div>
+      <div class="bar"><div id="totalFill"></div></div>
+    </div>
+    <div class="counts">
+      <div class="count" id="cdApp"><div class="num" id="cdAppNum">–</div><div class="lab">dager til BI-søknadsfrist (15. april 2027)</div></div>
+      <div class="count" id="cdStart"><div class="num" id="cdStartNum">–</div><div class="lab">dager til studiestart i Bergen (august 2027)</div></div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+  <main id="phases"></main>
+
+  <section class="block">
+    <h3>📊 Salgstracker – Snødriv</h3>
+    <div class="desc">Mål: 50+ salg i snitt per måned. Logg hver måned og se snittet.</div>
+    <div class="sales-stats">
+      <div class="sstat"><div class="n" id="sAvg">–</div><div class="l">snitt/mnd</div></div>
+      <div class="sstat"><div class="n" id="sHits">–</div><div class="l">mnd med 50+</div></div>
+      <div class="sstat"><div class="n" id="sBest">–</div><div class="l">beste måned</div></div>
+    </div>
+    <div class="sales-form">
+      <input type="month" id="salesMonth">
+      <input type="number" id="salesNum" placeholder="Antall salg" min="0" style="width:120px">
+      <button onclick="addSale()">Logg</button>
+    </div>
+    <div id="salesList"></div>
+  </section>
+
+  <section class="block">
+    <h3>🔁 Ukens vaner</h3>
+    <div class="desc" id="weekLabel"></div>
+    <div id="habits"></div>
+  </section>
+
+  <div class="footer-btns">
+    <button onclick="exportData()">💾 Eksporter backup</button>
+    <label>📂 Importer backup<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+    <button onclick="resetData()">↺ Nullstill alt</button>
+  </div>
+  <div class="hint">Alt lagres automatisk i nettleseren din. Klikk ✎ for å redigere et mål, ✕ for å slette.</div>
+</div>
+
+<script>
+const CATS = {kar:{n:'Karriere',c:'var(--kar)'},utd:{n:'Utdanning',c:'var(--utd)'},fys:{n:'Fysisk',c:'var(--fys)'},sos:{n:'Sosialt',c:'var(--sos)'},oko:{n:'Økonomi',c:'var(--oko)'},men:{n:'Mentalt',c:'var(--men)'}};
+const CAT_ORDER = ['kar','utd','fys','sos','oko','men'];
+
+const DEFAULT = {
+  phases:[
+    {id:'p1',name:'Fase 1: Snødriv & veien til BI',period:'Nå → august 2027',desc:'Levere i salg, søke BI Bergen Finans innen 15. april 2027, holde formen og vennene.',items:[
+      {t:'Snitte 50+ salg per måned i Snødriv (følg med i salgstrackeren)',c:'kar'},
+      {t:'Be om tilbakemelding fra teamleder hver måned og jobbe med ett forbedringspunkt om gangen',c:'kar'},
+      {t:'Lære salgsteknikk aktivt: én bok, podcast eller ett kurs om salg/innvendingshåndtering per kvartal',c:'kar'},
+      {t:'Dokumentere resultater og rekorder fra Snødriv (til CV og internship-søknader senere)',c:'kar'},
+      {t:'Be om attest og referanse fra Snødriv før studiestart',c:'kar',d:'Sommer 2027'},
+      {t:'Sjekke opptakskrav til BI Bergen – Bachelor i finans (GSK, ev. karakterkrav)',c:'utd',d:'Høst 2026'},
+      {t:'Ev. forbedre fag som privatist hvis opptakskravene krever det',c:'utd'},
+      {t:'Opprette søkerprofil på bi.no i god tid før fristen',c:'utd',d:'Feb/mars 2027'},
+      {t:'Sende søknad til BI Bergen Finans',c:'utd',d:'15. april 2027'},
+      {t:'Søke studielån og stipend hos Lånekassen etter opptak',c:'oko',d:'Vår/sommer 2027'},
+      {t:'Finne bolig i Bergen (SiB/privat) – start tidlig, Bergen er presset',c:'utd',d:'Vår 2027'},
+      {t:'Studiestart på BI Bergen 🎓',c:'utd',d:'August 2027'},
+      {t:'Trene styrke fast 2–3 ganger i uka',c:'fys'},
+      {t:'Løpe eller sykle minst 2 ganger i uka',c:'fys'},
+      {t:'Spise sunt: lage middag selv de fleste dagene, begrense takeaway og snacks',c:'fys'},
+      {t:'Prioritere søvn: 7–8 timer, fast leggetid på hverdager',c:'fys'},
+      {t:'Ta initiativ med venner minst én gang i uka – ikke bare svare, men inviteres',c:'sos'},
+      {t:'Holde jevnlig kontakt med de nærmeste vennene, også når det blir travelt',c:'sos'},
+      {t:'Bygge bufferkonto før studiestart (mål: 30 000+ kr)',c:'oko',d:'August 2027'},
+      {t:'Spare fast andel av lønn/provisjon hver måned (f.eks. 20 %)',c:'oko'},
+      {t:'Finne en rutine som gir mentalt overskudd (tur, trening, lesing – noe som ikke er skjerm)',c:'men'}
+    ]},
+    {id:'p2',name:'Fase 2: Bachelor i finans, BI Bergen',period:'2027 → 2030',desc:'Gode karakterer, to internships (år 2 og 3), nytt nettverk i Bergen – uten å miste de gamle.',items:[
+      {t:'Melde meg inn i studentforening/linjeforening første semester (nettverk + nye venner)',c:'sos',d:'Høst 2027'},
+      {t:'Melde meg inn på treningssenter i Bergen første uken (Sammen/privat)',c:'fys',d:'August 2027'},
+      {t:'Fullføre 1. år med et snitt jeg er stolt av (mål: B-snitt eller bedre)',c:'utd',d:'Vår 2028'},
+      {t:'Bygge LinkedIn-profil med Snødriv-resultatene og holde den oppdatert',c:'kar',d:'Høst 2027'},
+      {t:'Søke internship for sommeren etter 1. år – søknader ut tidlig',c:'kar',d:'Jan/feb 2028'},
+      {t:'Gjennomføre internship #1',c:'kar',d:'Sommer 2028'},
+      {t:'Delta på karrieredager og bedriftspresentasjoner på BI hvert år',c:'kar'},
+      {t:'Lære Excel skikkelig + grunnleggende Python for finans i løpet av studiet',c:'utd'},
+      {t:'Søke og gjennomføre internship #2',c:'kar',d:'Sommer 2029'},
+      {t:'Deltidsjobb (gjerne salg) ved siden av studiene for økonomi og CV',c:'oko'},
+      {t:'Holde treningsrutinen gjennom hele studiet: styrke + løp/sykkel',c:'fys'},
+      {t:'Beholde gamle venner: planlagte besøk/hjemreiser, ikke la det skli ut',c:'sos'},
+      {t:'Bygge en solid vennegjeng i Bergen',c:'sos'},
+      {t:'Bestemme masterretning: Business Analytics vs Finance (snakk med forelesere/alumni)',c:'utd',d:'Høst 2029'},
+      {t:'Søke master (BI/NHH/utland?)',c:'utd',d:'Vinter 2029/30'},
+      {t:'Fullføre bacheloroppgave og bachelorgrad 🎓',c:'utd',d:'Vår 2030'}
+    ]},
+    {id:'p3',name:'Fase 3: Master – Business Analytics / Finance',period:'2030 → 2032',desc:'Spisse profilen, relevant erfaring underveis, og lande full jobb før jeg er ferdig.',items:[
+      {t:'Starte på masterprogrammet',c:'utd',d:'Høst 2030'},
+      {t:'Relevant deltidsjobb eller internship underveis i masteren',c:'kar'},
+      {t:'Velge masteroppgave-tema som peker mot jobben jeg vil ha',c:'utd',d:'2031'},
+      {t:'Søke graduate-programmer og fulltidsjobber siste studieår',c:'kar',d:'Høst 2031'},
+      {t:'Fortsatt trene 3–4 ganger i uka – formen skal ikke ryke av studiepress',c:'fys'},
+      {t:'Fullføre mastergraden 🎓🎓',c:'utd',d:'Vår 2032'},
+      {t:'Signere fulltidsjobb innen utgangen av 2032',c:'kar',d:'2032'}
+    ]},
+    {id:'p4',name:'Fase 4: Karriere & livet',period:'2032 → 2036',desc:'Etablere karrieren, bygge økonomi og holde helse og vennskap ved like.',items:[
+      {t:'Etablere meg i første fulltidsjobb og levere de første 2 årene',c:'kar'},
+      {t:'Bygge egenkapital og vurdere boligkjøp (BSU fullt utnyttet)',c:'oko'},
+      {t:'Begynne å investere langsiktig (indeksfond) med fast månedlig beløp',c:'oko'},
+      {t:'Fortsatt i god form: trening er en livsstil, ikke et prosjekt',c:'fys'},
+      {t:'Vennskap og forhold prioriteres like høyt som karrieren',c:'sos'},
+      {t:'Årlig sjekk: er jeg på rett kurs? Juster planen hvert nyttår',c:'men'}
+    ]}
+  ],
+  habits:[
+    {id:'h1',n:'Styrketrening',goal:3},
+    {id:'h2',n:'Løp eller sykkel',goal:2},
+    {id:'h3',n:'Sunn hjemmelaget middag',goal:5},
+    {id:'h4',n:'Sosialt initiativ (avtale/melding)',goal:1},
+    {id:'h5',n:'Lest/lært noe om salg eller finans',goal:2}
+  ],
+  sales:[],
+  weeks:{}
+};
+
+const QUOTES=[
+  ['Disiplin er å velge det du vil mest, fremfor det du vil nå.','Abraham Lincoln (tillagt)'],
+  ['Du trenger ikke være best i dag. Du må bare være bedre enn i går.',''],
+  ['Suksess er summen av små innsatser, gjentatt dag etter dag.','Robert Collier'],
+  ['Den beste tiden å plante et tre var for 20 år siden. Den nest beste er nå.','Kinesisk ordtak'],
+  ['50 salg i måneden er 2–3 om dagen. Fokuser på dagen.',''],
+  ['Ingen bryr seg om unnskyldningene dine – heldigvis bryr de seg heller ikke om feilene dine. Bare fortsett.',''],
+  ['Motivasjon får deg i gang. Vaner holder deg gående.','Jim Ryun'],
+  ['Sammenlign deg med den du var i fjor, ikke med andre.',''],
+  ['Hard i hodet, myk i planen: målet står fast, veien kan justeres.',''],
+  ['Det du gjør hver dag betyr mer enn det du gjør en gang iblant.','Gretchen Rubin']
+];
+
+let S;
+const uid=()=>Math.random().toString(36).slice(2,9);
+function load(){
+  try{
+    const raw=localStorage.getItem('oskarplan_v1');
+    if(raw){S=JSON.parse(raw);return}
+  }catch(e){}
+  S=JSON.parse(JSON.stringify(DEFAULT));
+  S.phases.forEach(p=>p.items.forEach(i=>{i.id=uid();i.done=false}));
+  save();
+}
+function save(){try{localStorage.setItem('oskarplan_v1',JSON.stringify(S))}catch(e){}}
+
+// ---------- countdowns ----------
+function daysTo(dateStr){
+  const d=new Date(dateStr+'T00:00:00');
+  return Math.ceil((d-new Date())/(864e5));
+}
+function renderCountdowns(){
+  const a=daysTo('2027-04-15'), b=daysTo('2027-08-10');
+  const na=document.getElementById('cdAppNum'), nb=document.getElementById('cdStartNum');
+  na.textContent=a>0?a:'✓'; nb.textContent=b>0?b:'✓';
+  if(a<=0)document.getElementById('cdApp').classList.add('done');
+  if(b<=0)document.getElementById('cdStart').classList.add('done');
+}
+
+// ---------- quotes ----------
+let qi=Math.floor(Math.random()*QUOTES.length);
+function renderQuote(){
+  const [q,by]=QUOTES[qi];
+  document.getElementById('quote').innerHTML='«'+q+'»'+(by?'<small>– '+by+'</small>':'');
+}
+document.getElementById('quote').onclick=()=>{qi=(qi+1)%QUOTES.length;renderQuote()};
+
+// ---------- phases ----------
+let activePhase=0;
+function renderTabs(){
+  const t=document.getElementById('tabs');
+  t.innerHTML='';
+  S.phases.forEach((p,idx)=>{
+    const b=document.createElement('button');
+    b.className='tab'+(idx===activePhase?' active':'');
+    b.textContent=p.name.split(':')[0];
+    b.onclick=()=>{activePhase=idx;renderTabs();renderPhases()};
+    t.appendChild(b);
+  });
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function renderPhases(){
+  const wrap=document.getElementById('phases');
+  wrap.innerHTML='';
+  S.phases.forEach((p,idx)=>{
+    const div=document.createElement('div');
+    div.className='phase'+(idx===activePhase?' show':'');
+    const done=p.items.filter(i=>i.done).length, tot=p.items.length;
+    const pct=tot?Math.round(done/tot*100):0;
+    let html=`<div class="phase-head"><h2>${esc(p.name)}</h2><p><b>${esc(p.period)}</b> · ${esc(p.desc)}</p>
+      <div class="bar"><div style="width:${pct}%"></div></div><div class="pct">${done}/${tot} fullført (${pct}%)</div></div>`;
+    CAT_ORDER.forEach(cat=>{
+      const items=p.items.filter(i=>i.c===cat);
+      if(!items.length)return;
+      html+=`<div class="cat-group"><div class="cat-title" style="color:${CATS[cat].c}">${CATS[cat].n}</div>`;
+      items.forEach(i=>{
+        html+=`<div class="item ${i.done?'done':''}" data-id="${i.id}">
+          <div class="chk" onclick="toggle('${p.id}','${i.id}')">✓</div>
+          <div class="txt">${esc(i.t)}</div>
+          ${i.d?`<span class="deadline">📅 ${esc(i.d)}</span>`:''}
+          <button class="ibtn" onclick="editItem('${p.id}','${i.id}')" title="Rediger">✎</button>
+          <button class="ibtn" onclick="delItem('${p.id}','${i.id}')" title="Slett">✕</button>
+        </div>`;
+      });
+      html+='</div>';
+    });
+    html+=`<div class="adder">
+      <input type="text" id="add-${p.id}" placeholder="Legg til nytt mål…" onkeydown="if(event.key==='Enter')addItem('${p.id}')">
+      <select id="cat-${p.id}">${CAT_ORDER.map(c=>`<option value="${c}">${CATS[c].n}</option>`).join('')}</select>
+      <button onclick="addItem('${p.id}')">+ Legg til</button>
+    </div>`;
+    div.innerHTML=html;
+    wrap.appendChild(div);
+  });
+  renderTotal();
+}
+function phase(pid){return S.phases.find(p=>p.id===pid)}
+function toggle(pid,iid){
+  const i=phase(pid).items.find(x=>x.id===iid);
+  i.done=!i.done; save(); renderPhases();
+}
+function editItem(pid,iid){
+  const i=phase(pid).items.find(x=>x.id===iid);
+  const t=prompt('Rediger mål:',i.t);
+  if(t===null)return;
+  if(t.trim())i.t=t.trim();
+  const d=prompt('Frist/tidspunkt (tomt = ingen):',i.d||'');
+  if(d!==null)i.d=d.trim()||undefined;
+  save(); renderPhases();
+}
+function delItem(pid,iid){
+  if(!confirm('Slette dette målet?'))return;
+  const p=phase(pid);
+  p.items=p.items.filter(x=>x.id!==iid);
+  save(); renderPhases();
+}
+function addItem(pid){
+  const inp=document.getElementById('add-'+pid);
+  const t=inp.value.trim();
+  if(!t)return;
+  phase(pid).items.push({id:uid(),t,c:document.getElementById('cat-'+pid).value,done:false});
+  inp.value=''; save(); renderPhases();
+}
+function renderTotal(){
+  const all=S.phases.flatMap(p=>p.items);
+  const pct=all.length?Math.round(all.filter(i=>i.done).length/all.length*100):0;
+  document.getElementById('totalFill').style.width=pct+'%';
+  document.getElementById('totalPct').textContent=pct+'%';
+}
+
+// ---------- habits (weekly, mon-sun) ----------
+function weekKey(){
+  const d=new Date();
+  const t=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const day=(t.getDay()+6)%7; t.setDate(t.getDate()-day+3);
+  const first=new Date(t.getFullYear(),0,4);
+  const wk=1+Math.round(((t-first)/864e5-3+((first.getDay()+6)%7))/7);
+  return t.getFullYear()+'-U'+wk;
+}
+const DAYS=['M','T','O','T','F','L','S'];
+function renderHabits(){
+  const wk=weekKey();
+  document.getElementById('weekLabel').textContent='Uke '+wk.split('U')[1]+' – nullstilles automatisk hver mandag. Trykk på dagene du har gjort vanen.';
+  if(!S.weeks[wk])S.weeks[wk]={};
+  const box=document.getElementById('habits');
+  box.innerHTML='';
+  S.habits.forEach(h=>{
+    const marks=S.weeks[wk][h.id]||[0,0,0,0,0,0,0];
+    const cnt=marks.filter(Boolean).length;
+    const div=document.createElement('div');
+    div.className='habit'+(cnt>=h.goal?' met':'');
+    div.innerHTML=`<div class="hname">${esc(h.n)}</div><div class="hgoal">${cnt}/${h.goal}x</div>
+      <div class="days">${DAYS.map((d,i)=>`<div class="day ${marks[i]?'on':''}" onclick="toggleDay('${h.id}',${i})">${d}</div>`).join('')}</div>`;
+    box.appendChild(div);
+  });
+}
+function toggleDay(hid,day){
+  const wk=weekKey();
+  if(!S.weeks[wk])S.weeks[wk]={};
+  if(!S.weeks[wk][hid])S.weeks[wk][hid]=[0,0,0,0,0,0,0];
+  S.weeks[wk][hid][day]=S.weeks[wk][hid][day]?0:1;
+  save(); renderHabits();
+}
+
+// ---------- sales ----------
+function addSale(){
+  const m=document.getElementById('salesMonth').value;
+  const n=parseInt(document.getElementById('salesNum').value);
+  if(!m||isNaN(n))return alert('Velg måned og antall salg.');
+  S.sales=S.sales.filter(s=>s.m!==m);
+  S.sales.push({m,n});
+  S.sales.sort((a,b)=>a.m<b.m?1:-1);
+  document.getElementById('salesNum').value='';
+  save(); renderSales();
+}
+function delSale(m){S.sales=S.sales.filter(s=>s.m!==m);save();renderSales()}
+const MND=['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+function renderSales(){
+  const list=document.getElementById('salesList');
+  list.innerHTML='';
+  if(S.sales.length){
+    const avg=Math.round(S.sales.reduce((a,s)=>a+s.n,0)/S.sales.length*10)/10;
+    document.getElementById('sAvg').textContent=avg;
+    document.getElementById('sAvg').style.color=avg>=50?'var(--green)':'var(--red)';
+    document.getElementById('sHits').textContent=S.sales.filter(s=>s.n>=50).length+'/'+S.sales.length;
+    document.getElementById('sBest').textContent=Math.max(...S.sales.map(s=>s.n));
+  }else{
+    ['sAvg','sHits','sBest'].forEach(id=>document.getElementById(id).textContent='–');
+    document.getElementById('sAvg').style.color='';
+  }
+  S.sales.forEach(s=>{
+    const [y,mo]=s.m.split('-');
+    const div=document.createElement('div');
+    div.className='srow '+(s.n>=50?'hit':'miss');
+    div.innerHTML=`<div class="m">${MND[+mo-1]} ${y}</div><div class="v">${s.n} salg</div><button onclick="delSale('${s.m}')">✕</button>`;
+    list.appendChild(div);
+  });
+}
+
+// ---------- backup ----------
+function exportData(){
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S,null,2));
+  a.download='oskars-plan-backup.json';
+  a.click();
+}
+function importData(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{S=JSON.parse(r.result);save();renderAll()}catch(err){alert('Ugyldig fil.')}};
+  r.readAsText(f);
+}
+function resetData(){
+  if(!confirm('Slette all fremgang og starte på nytt?'))return;
+  localStorage.removeItem('oskarplan_v1');
+  load(); renderAll();
+}
+
+function renderAll(){renderTabs();renderPhases();renderHabits();renderSales();renderCountdowns();renderQuote()}
+load();
+// set default month input to current month
+document.getElementById('salesMonth').value=new Date().toISOString().slice(0,7);
+renderAll();
+</script>
+</body>
+</html>
