@@ -294,12 +294,31 @@
 </div>
 
 <script>
-const CATS = {kar:{n:'Karriere',c:'var(--kar)'},utd:{n:'Utdanning',c:'var(--utd)'},fys:{n:'Fysisk',c:'var(--fys)'},sos:{n:'Sosialt',c:'var(--sos)'},oko:{n:'Økonomi',c:'var(--oko)'},men:{n:'Mentalt',c:'var(--men)'}};
-const CAT_ORDER = ['kar','utd','fys','sos','oko','men'];
+const CATS = {kar:{n:'Karriere',c:'var(--kar)'},utd:{n:'Utdanning',c:'var(--utd)'},hinn:{n:'HINN Bedriftsøkonomi (deltid nett)',c:'#ff7ab8'},fys:{n:'Fysisk',c:'var(--fys)'},sos:{n:'Sosialt',c:'var(--sos)'},oko:{n:'Økonomi',c:'var(--oko)'},men:{n:'Mentalt',c:'var(--men)'}};
+const CAT_ORDER = ['kar','utd','hinn','fys','sos','oko','men'];
+
+const HINN_ITEMS=[
+  {t:'Søke opptak til Årsstudium i bedriftsøkonomi – nettbasert (HINN) og takke ja til plassen',c:'hinn',d:'August 2026'},
+  {t:'Registrere meg i Studentweb og betale semesteravgift (gjøres hvert semester)',c:'hinn',d:'August 2026'},
+  {t:'Lage fast studierutine ved siden av Snødriv: min. 8–10 timer i uka (f.eks. 2 kvelder + 1 helgedag)',c:'hinn'},
+  {t:'Sjekke hvilke to emner som har skoleeksamen med fysisk oppmøte – planlegge reise/sted i god tid',c:'hinn',d:'Høst 2026'},
+  {t:'Fullføre 1. semester – 15 studiepoeng',c:'hinn',d:'Høst 2026'},
+  {t:'Fullføre 2. semester – 30 stp totalt',c:'hinn',d:'Vår 2027'},
+  {t:'Sjekke om emner kan innpasses / gi fritak på BI-bacheloren (kontakt BI-opptak)',c:'hinn',d:'Sommer 2027'},
+  {t:'Fullføre hele årsstudiet – 60 studiepoeng ✅',c:'hinn',d:'Vår 2028'},
+  {t:'📚 Bestille pensumbøker 1. semester (sjekk pensumliste/Leganto på emnesidene når du får tilgang)',c:'hinn',d:'August 2026'},
+  {t:'📚 Pensum: Bedriftsøkonomisk analyse / grunnleggende regnskap',c:'hinn'},
+  {t:'📚 Pensum: Matematikk for økonomer',c:'hinn'},
+  {t:'📚 Pensum: Statistikk for økonomer',c:'hinn'},
+  {t:'📚 Pensum: Mikroøkonomi',c:'hinn'},
+  {t:'📚 Pensum: Markedsføring',c:'hinn'},
+  {t:'📚 Pensum: Organisasjonsforståelse / ledelse',c:'hinn'},
+  {t:'🧮 Skaffe godkjent eksamenskalkulator + tilgang til Excel',c:'hinn',d:'Høst 2026'}
+];
 
 const DEFAULT = {
   phases:[
-    {id:'p1',name:'Fase 1: Snødriv & veien til BI',period:'Nå → august 2027',desc:'Levere i salg, søke BI Bergen Finans innen 15. april 2027, holde formen og vennene.',items:[
+    {id:'p1',name:'Fase 1: Snødriv & veien til BI',period:'Nå → august 2027',desc:'Levere i salg, ta bedriftsøkonomi på nett (HINN) ved siden av, søke BI Bergen Finans innen 15. april 2027, holde formen og vennene.',items:[
       {t:'Snitte 50+ salg per måned i Snødriv (følg med i salgstrackeren)',c:'kar'},
       {t:'Be om tilbakemelding fra teamleder hver måned og jobbe med ett forbedringspunkt om gangen',c:'kar'},
       {t:'Lære salgsteknikk aktivt: én bok, podcast eller ett kurs om salg/innvendingshåndtering per kvartal',c:'kar'},
@@ -436,12 +455,21 @@ function load(){
       if(!S.focus)S.focus={};
       if(!S.notif)S.notif={enabled:false,time:'21:00',lastFired:''};
       if(!S.ui)S.ui={open:{}};
+      migrateHinn();
       return;
     }
   }catch(e){}
   S=JSON.parse(JSON.stringify(DEFAULT));
   S.phases.forEach(p=>p.items.forEach(i=>{i.id=uid();i.done=false}));
+  migrateHinn();
   save();
+}
+function migrateHinn(){
+  const p1=S.phases.find(p=>p.id==='p1');
+  if(p1&&!p1.items.some(i=>i.c==='hinn')){
+    HINN_ITEMS.forEach(x=>p1.items.push({id:uid(),t:x.t,c:x.c,d:x.d,done:false}));
+    save();
+  }
 }
 function save(){try{localStorage.setItem('oskarplan_v1',JSON.stringify(S))}catch(e){}}
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
@@ -965,7 +993,7 @@ function exportData(){
 function importData(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=()=>{try{S=JSON.parse(r.result);if(!S.diary)S.diary={};if(!S.focus)S.focus={};if(!S.notif)S.notif={enabled:false,time:'21:00',lastFired:''};if(!S.ui)S.ui={open:{}};save();renderAll()}catch(err){alert('Ugyldig fil.')}};
+  r.onload=()=>{try{S=JSON.parse(r.result);if(!S.diary)S.diary={};if(!S.focus)S.focus={};if(!S.notif)S.notif={enabled:false,time:'21:00',lastFired:''};if(!S.ui)S.ui={open:{}};migrateHinn();save();renderAll()}catch(err){alert('Ugyldig fil.')}};
   r.readAsText(f);
 }
 function resetData(){
