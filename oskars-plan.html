@@ -55,7 +55,20 @@
   .phase-head p{color:var(--muted);font-size:.88rem;margin-top:4px}
   .phase-head .bar{margin-top:10px}
   .phase-head .pct{font-size:.8rem;color:var(--muted);margin-top:5px;text-align:right}
-  .cat-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 0 6px 4px}
+  .cat-hd{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin:8px 0 6px;cursor:pointer;user-select:none;transition:.15s}
+  .cat-hd:hover{border-color:#3a4560}
+  .cat-hd .chev{transition:transform .2s;color:var(--muted);font-size:.75rem}
+  .cat-hd.open .chev{transform:rotate(90deg)}
+  .cat-hd .cname{font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em}
+  .cat-hd .cprog{margin-left:auto;font-size:.75rem;color:var(--muted)}
+  .cat-hd .cnext{font-size:.72rem;color:var(--gold)}
+  .cat-body{display:none;padding-left:4px}
+  .cat-body.open{display:block}
+  .upcoming{background:linear-gradient(135deg,#241f10,#1c1a24);border:1px solid #5a4a20;border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .upcoming h4{font-size:.85rem;color:var(--gold);margin-bottom:8px}
+  .uprow{display:flex;gap:10px;font-size:.86rem;padding:4px 0;align-items:baseline}
+  .uprow .ud{color:var(--gold);white-space:nowrap;font-size:.74rem;min-width:110px}
+  .uprow .cdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;align-self:center}
   .item{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;transition:.2s}
   .item:hover{border-color:#3a4560}
   .item.done{opacity:.55}
@@ -353,7 +366,8 @@ const DEFAULT = {
     {id:'h5',n:'Lest/lært noe om salg eller finans',goal:2}
   ],
   sales:[], weeks:{}, diary:{}, focus:{},
-  notif:{enabled:false,time:'21:00',lastFired:''}
+  notif:{enabled:false,time:'21:00',lastFired:''},
+  ui:{open:{}}
 };
 
 const QUOTES=[
@@ -421,6 +435,7 @@ function load(){
       if(!S.diary)S.diary={};
       if(!S.focus)S.focus={};
       if(!S.notif)S.notif={enabled:false,time:'21:00',lastFired:''};
+      if(!S.ui)S.ui={open:{}};
       return;
     }
   }catch(e){}
@@ -472,6 +487,32 @@ function renderTabs(){
     t.appendChild(b);
   });
 }
+// tolker norske frist-tekster («15. april 2027», «Høst 2026», «Vinter 2029/30») til sorterbar verdi
+const MND_KEYS={januar:1,februar:2,mars:3,april:4,mai:5,juni:6,juli:7,august:8,september:9,oktober:10,november:11,desember:12,jan:1,feb:2,mar:3,apr:4,jun:6,jul:7,aug:8,sep:9,okt:10,nov:11,des:12,'vår':4,'vinter':1,'sommer':6,'høst':9};
+function dlVal(d){
+  if(!d)return 9e9; // uten frist: løpende mål, legges etter tidfestede
+  const s=d.toLowerCase();
+  const ym=s.match(/20\d\d/);
+  const year=ym?parseInt(ym[0]):2100;
+  let month=13, pos=Infinity;
+  for(const k in MND_KEYS){
+    const i=s.indexOf(k);
+    if(i>=0&&i<pos){pos=i;month=MND_KEYS[k]}
+  }
+  if(month===13)month=6;
+  return year*12+month;
+}
+function sortItems(items){
+  return items.slice().sort((a,b)=>{
+    if(!!a.done!==!!b.done)return a.done?1:-1;
+    return dlVal(a.d)-dlVal(b.d);
+  });
+}
+function toggleCat(pid,cat){
+  const k=pid+'_'+cat;
+  S.ui.open[k]=!S.ui.open[k];
+  save();renderPhases();
+}
 function renderPhases(){
   const wrap=document.getElementById('phases');
   wrap.innerHTML='';
@@ -482,10 +523,36 @@ function renderPhases(){
     const pct=tot?Math.round(done/tot*100):0;
     let html=`<div class="phase-head"><h2>${esc(p.name)}</h2><p><b>${esc(p.period)}</b> · ${esc(p.desc)}</p>
       <div class="bar"><div style="width:${pct}%"></div></div><div class="pct">${done}/${tot} fullført (${pct}%)</div></div>`;
-    CAT_ORDER.forEach(cat=>{
-      const items=p.items.filter(i=>i.c===cat);
-      if(!items.length)return;
-      html+=`<div><div class="cat-title" style="color:${CATS[cat].c}">${CATS[cat].n}</div>`;
+
+    // kommende frister øverst
+    const upcoming=sortItems(p.items.filter(i=>!i.done&&i.d&&dlVal(i.d)<9e9)).slice(0,5);
+    if(upcoming.length){
+      html+=`<div class="upcoming"><h4>🔜 Nærmeste frister</h4>`;
+      upcoming.forEach(i=>{
+        html+=`<div class="uprow"><span class="cdot" style="background:${CATS[i.c].c}"></span><span class="ud">📅 ${esc(i.d)}</span><span>${esc(i.t)}</span></div>`;
+      });
+      html+='</div>';
+    }
+
+    // kategorier sortert etter nærmeste frist i kategorien, sammenleggbare
+    const cats=CAT_ORDER.filter(c=>p.items.some(i=>i.c===c))
+      .sort((a,b)=>{
+        const va=Math.min(...p.items.filter(i=>i.c===a&&!i.done).map(i=>dlVal(i.d)),9e9+1);
+        const vb=Math.min(...p.items.filter(i=>i.c===b&&!i.done).map(i=>dlVal(i.d)),9e9+1);
+        return va-vb;
+      });
+    cats.forEach(cat=>{
+      const items=sortItems(p.items.filter(i=>i.c===cat));
+      const cdone=items.filter(i=>i.done).length;
+      const open=!!S.ui.open[p.id+'_'+cat];
+      const next=items.find(i=>!i.done&&i.d&&dlVal(i.d)<9e9);
+      html+=`<div class="cat-hd ${open?'open':''}" onclick="toggleCat('${p.id}','${cat}')">
+        <span class="chev">▶</span>
+        <span class="cname" style="color:${CATS[cat].c}">${CATS[cat].n}</span>
+        ${!open&&next?`<span class="cnext">📅 ${esc(next.d)}</span>`:''}
+        <span class="cprog">${cdone}/${items.length} ${cdone===items.length?'✅':''}</span>
+      </div>
+      <div class="cat-body ${open?'open':''}">`;
       items.forEach(i=>{
         html+=`<div class="item ${i.done?'done':''}">
           <div class="chk" onclick="toggle('${p.id}','${i.id}')">✓</div>
@@ -525,7 +592,9 @@ function delItem(pid,iid){
 function addItem(pid){
   const inp=document.getElementById('add-'+pid);
   const t=inp.value.trim(); if(!t)return;
-  phase(pid).items.push({id:uid(),t,c:document.getElementById('cat-'+pid).value,done:false});
+  const cat=document.getElementById('cat-'+pid).value;
+  phase(pid).items.push({id:uid(),t,c:cat,done:false});
+  S.ui.open[pid+'_'+cat]=true;
   inp.value='';save();renderPhases();
 }
 function renderTotal(){
@@ -896,7 +965,7 @@ function exportData(){
 function importData(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=()=>{try{S=JSON.parse(r.result);if(!S.diary)S.diary={};if(!S.focus)S.focus={};if(!S.notif)S.notif={enabled:false,time:'21:00',lastFired:''};save();renderAll()}catch(err){alert('Ugyldig fil.')}};
+  r.onload=()=>{try{S=JSON.parse(r.result);if(!S.diary)S.diary={};if(!S.focus)S.focus={};if(!S.notif)S.notif={enabled:false,time:'21:00',lastFired:''};if(!S.ui)S.ui={open:{}};save();renderAll()}catch(err){alert('Ugyldig fil.')}};
   r.readAsText(f);
 }
 function resetData(){
